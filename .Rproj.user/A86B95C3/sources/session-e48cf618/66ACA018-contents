@@ -1,0 +1,71 @@
+# Step a: Load necessary libraries and dataset
+#-----------------------------------------------
+# Libraries: tidyverse for data manipulation and plotting, rpart for decision trees
+library(tidyverse)
+library(rpart)
+library(rpart.plot)
+
+# Load dataset from the uploaded path
+credit_data <- read.csv(file.choose())
+
+# Check the first few rows
+head(credit_data)
+
+# Check summary statistics
+summary(credit_data)
+
+# Create histograms for all numeric variables
+numeric_vars <- credit_data %>% select_if(is.numeric)
+numeric_vars %>%
+  gather(key = "variable", value = "value") %>%
+  ggplot(aes(x = value)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black") +
+  facet_wrap(~variable, scales = "free") +
+  theme_minimal() +
+  labs(title = "Histograms of Numeric Variables")
+
+
+# Step b: Split the data into training (70%) and testing (30%) sets
+set.seed(123)  # for reproducibility
+sample_index <- sample(1:nrow(credit_data), 0.7 * nrow(credit_data))
+train_data <- credit_data[sample_index, ]
+test_data <- credit_data[-sample_index, ]
+
+
+# Step c: Create decision tree model specification and fit model
+# Formula: Class (fraud or not) as target, all other variables as predictors
+tree_model <- rpart(Class ~ ., data = train_data, method = "class")
+
+# Plot the tree
+rpart.plot(tree_model, type = 3, extra = 101)
+
+
+
+# Step d: Evaluate the decision tree model
+# Predict on the test data
+pred_class <- predict(tree_model, test_data, type = "class")
+
+# Confusion matrix to evaluate performance
+table(Predicted = pred_class, Actual = test_data$Class)
+
+# Accuracy calculation
+accuracy <- sum(pred_class == test_data$Class) / nrow(test_data)
+accuracy
+
+
+# Step e: Interpretation of predictions
+# Example: show how many frauds were correctly predicted
+library(caret)
+confusionMatrix(pred_class, as.factor(test_data$Class))
+
+
+
+# Step f: Create rules and plot variable importance
+# Extract rules from the tree
+printcp(tree_model)  # complexity parameter table
+rpart.rules <- path.rpart(tree_model, nodes = rownames(tree_model$frame))
+rpart.rules
+
+# Variable importance plot
+importance <- tree_model$variable.importance
+barplot(importance, main = "Variable Importance from Decision Tree", col = "orange", las=2)

@@ -1,0 +1,100 @@
+# Assignment 5.5
+
+# ----------------------------
+# Part 1: Setup Environment
+# ----------------------------
+
+if (!require(ggplot2)) install.packages("ggplot2")
+if (!require(dplyr)) install.packages("dplyr")
+if (!require(caret)) install.packages("caret")
+
+library(ggplot2)
+library(dplyr)
+library(caret)
+
+# Load dataset
+insurance <- read.csv(file.choose(), stringsAsFactors = FALSE)
+
+# Inspect
+str(insurance)
+summary(insurance)
+head(insurance)
+
+# ----------------------------
+# Part 2: EDA & Preprocessing
+# ----------------------------
+
+insurance$sex <- as.factor(insurance$sex)
+insurance$smoker <- as.factor(insurance$smoker)
+insurance$region <- as.factor(insurance$region)
+
+# Scatter plots for continuous variables
+ggplot(insurance, aes(x = age, y = charges)) + geom_point() + geom_smooth(method="lm") + ggtitle("Charges vs Age")
+ggplot(insurance, aes(x = bmi, y = charges)) + geom_point() + geom_smooth(method="lm") + ggtitle("Charges vs BMI")
+ggplot(insurance, aes(x = children, y = charges)) + geom_point() + geom_smooth(method="lm") + ggtitle("Charges vs Children")
+
+# Box plots for categorical variables
+ggplot(insurance, aes(x = sex, y = charges)) + geom_boxplot() + ggtitle("Charges by Sex")
+ggplot(insurance, aes(x = smoker, y = charges)) + geom_boxplot() + ggtitle("Charges by Smoker")
+ggplot(insurance, aes(x = region, y = charges)) + geom_boxplot() + ggtitle("Charges by Region")
+
+# ----------------------------
+# Part 3: Model Building
+# ----------------------------
+
+set.seed(123)
+train_index <- createDataPartition(insurance$charges, p = 0.7, list = FALSE)
+train_data <- insurance[train_index, ]
+test_data <- insurance[-train_index, ]
+
+model <- lm(charges ~ age + sex + bmi + children + smoker + region, data = train_data)
+summary(model)
+
+
+# Part 4: Model Interpretation
+# age coefficient = 248.96 → each additional year of age increases charges by $248.96
+# bmi coefficient = 332.54 → each unit increase in BMI increases charges by $332.54
+# children coefficient = 441.85 → each additional child increases charges by $441.85
+# sexmale coefficient = -249.47 → males pay $249.47 less than females (not significant)
+# smokeryes coefficient = 24015.67 → smokers pay $24,015.67 more than non-smokers
+# regionnorthwest coefficient = -322.64 → charges decrease by $322.64 vs baseline (not significant)
+# regionsoutheast coefficient = -1109.24 → charges decrease by $1,109.24 vs baseline (significant)
+# regionsouthwest coefficient = -878.77 → charges decrease by $878.77 vs baseline (not significant)
+# Multiple R-squared = 0.7602
+# Adjusted R-squared = 0.7582
+# F-statistic = 368.2, p < 2e-16
+
+# ----------------------------
+# Part 5: Diagnostics
+# ----------------------------
+
+par(mfrow=c(2,2))
+plot(model)
+
+# ----------------------------
+# Part 6: Predictions & Evaluation
+# ----------------------------
+
+predictions <- predict(model, newdata = test_data)
+rmse <- sqrt(mean((predictions - test_data$charges)^2))
+rmse
+
+ss_res <- sum((test_data$charges - predictions)^2)
+ss_tot <- sum((test_data$charges - mean(test_data$charges))^2)
+r_squared_test <- 1 - (ss_res/ss_tot)
+r_squared_test
+
+# ----------------------------
+# Part 7: Predict New Individual
+# ----------------------------
+
+new_person <- data.frame(
+  age = 35,
+  sex = factor("male", levels = levels(insurance$sex)),
+  bmi = 28.5,
+  children = 2,
+  smoker = factor("no", levels = levels(insurance$smoker)),
+  region = factor("southeast", levels = levels(insurance$region))
+)
+
+predict(model, new_person)

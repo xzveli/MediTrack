@@ -1,0 +1,119 @@
+# Assignment 5.5 – Predicting Medical Insurance Costs with Multiple Regression
+# Name: [Your Name]
+# Date: [Date]
+
+# ----------------------------
+# Part 1: Setting Up Environment
+# ----------------------------
+
+# Install and load necessary packages
+install.packages(c("ggplot2", "dplyr", "caret"))
+library(ggplot2)
+library(dplyr)
+library(caret)
+
+# Load the dataset
+insurance <- read.csv("/mnt/data/insurance.csv", stringsAsFactors = FALSE)
+
+# Inspect the data
+str(insurance)
+summary(insurance)
+head(insurance)
+
+# ----------------------------
+# Part 2: EDA & Preprocessing
+# ----------------------------
+
+# Convert categorical variables to factors
+insurance$sex <- as.factor(insurance$sex)
+insurance$smoker <- as.factor(insurance$smoker)
+insurance$region <- as.factor(insurance$region)
+
+# Scatter plots for continuous variables vs charges
+ggplot(insurance, aes(x = age, y = charges)) + geom_point() + geom_smooth(method="lm") + ggtitle("Charges vs Age")
+ggplot(insurance, aes(x = bmi, y = charges)) + geom_point() + geom_smooth(method="lm") + ggtitle("Charges vs BMI")
+ggplot(insurance, aes(x = children, y = charges)) + geom_point() + geom_smooth(method="lm") + ggtitle("Charges vs Children")
+
+# Box plots for categorical variables vs charges
+ggplot(insurance, aes(x = sex, y = charges)) + geom_boxplot() + ggtitle("Charges by Sex")
+ggplot(insurance, aes(x = smoker, y = charges)) + geom_boxplot() + ggtitle("Charges by Smoker")
+ggplot(insurance, aes(x = region, y = charges)) + geom_boxplot() + ggtitle("Charges by Region")
+
+# ----------------------------
+# Part 3: Building the Model
+# ----------------------------
+
+# Split data: 70% training, 30% testing
+set.seed(123)
+train_index <- createDataPartition(insurance$charges, p = 0.7, list = FALSE)
+train_data <- insurance[train_index, ]
+test_data <- insurance[-train_index, ]
+
+# Build multiple regression model
+model <- lm(charges ~ age + sex + bmi + children + smoker + region, data = train_data)
+
+# Summary of model
+summary(model)
+
+# ----------------------------
+# Part 4: Interpreting Model
+# ----------------------------
+
+# Coefficients interpretation:
+# - age: effect of 1 year increase in age on charges
+# - bmi: effect of 1 unit increase in BMI on charges
+# - children: effect of having additional children on charges
+# - sex: difference in charges between male and female
+# - smoker: difference in charges between smoker and non-smoker
+# - region: difference in charges by region (baseline region comparison)
+# Multiple R-squared: proportion of variance explained by model
+# Adjusted R-squared: R-squared adjusted for number of predictors
+# F-statistic and p-value: overall significance of model
+
+# ----------------------------
+# Part 5: Model Diagnostics
+# ----------------------------
+
+# Diagnostic plots
+par(mfrow=c(2,2))
+plot(model)
+
+# Check:
+# 1. Residuals vs Fitted -> linearity and homoscedasticity
+# 2. Normal Q-Q -> normality of residuals
+# 3. Scale-Location -> homoscedasticity
+# 4. Residuals vs Leverage -> influential points
+
+# ----------------------------
+# Part 6: Predictions & Evaluation
+# ----------------------------
+
+# Predictions on test data
+predictions <- predict(model, newdata = test_data)
+
+# Compute RMSE
+rmse <- sqrt(mean((predictions - test_data$charges)^2))
+rmse
+
+# Compute R-squared for test set
+ss_res <- sum((test_data$charges - predictions)^2)
+ss_tot <- sum((test_data$charges - mean(test_data$charges))^2)
+r_squared_test <- 1 - (ss_res/ss_tot)
+r_squared_test
+
+# ----------------------------
+# Part 7: Predicting for a New Individual
+# ----------------------------
+
+# Example new individual
+new_person <- data.frame(
+  age = 35,
+  sex = factor("male", levels = levels(insurance$sex)),
+  bmi = 28.5,
+  children = 2,
+  smoker = factor("no", levels = levels(insurance$smoker)),
+  region = factor("southeast", levels = levels(insurance$region))
+)
+
+# Predict charges
+predict(model, new_person)

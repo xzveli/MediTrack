@@ -1,0 +1,27 @@
+{
+    "id": "10ED8483",
+    "path": "~/MediTrack/R/00_setup.R",
+    "project_path": "R/00_setup.R",
+    "type": "r_source",
+    "hash": "971162232",
+    "contents": "",
+    "dirty": false,
+    "created": 1780900600414.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "tempName": "Untitled1",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "28,0",
+        "scrollLine": "20"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1780900633,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1780900633592,
+    "read_only": false,
+    "read_only_alternatives": []
+}

@@ -1,0 +1,52 @@
+Confusion Matrix and Statistics
+
+                Reference
+Prediction       Not_Readmitted
+  Not_Readmitted            785
+  Readmitted                610
+                Reference
+Prediction       Readmitted
+  Not_Readmitted       1791
+  Readmitted           2213
+                         
+               Accuracy :
+                 95% CI :
+    No Information Rate :
+    P-Value [Acc > NIR] :
+                         
+                  Kappa :
+                         
+ Mcnemar's Test P-Value :
+                         
+            Sensitivity :
+            Specificity :
+         Pos Pred Value :
+         Neg Pred Value :
+             Prevalence :
+         Detection Rate :
+   Detection Prevalence :
+      Balanced Accuracy :
+                         
+       'Positive' Class :
+                         
+                 
+ 0.5553          
+ (0.5419, 0.5686)
+ 0.7416          
+ 1               
+                 
+ 0.0905          
+                 
+ <2e-16          
+                 
+ 0.5527          
+ 0.5627          
+ 0.7839          
+ 0.3047          
+ 0.7416          
+ 0.4099          
+ 0.5229          
+ 0.5577          
+                 
+ Readmitted      
+                 
