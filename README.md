@@ -29,3 +29,14 @@ The project applies data preprocessing, exploratory data analysis, and machine l
 ## Tools
 
 R, machine learning, data analysis, Git, GitHub
+
+## Dashboard
+
+To run the R Shiny dashboard locally:
+
+1. Open RStudio
+2. Set working directory to the app folder:
+   setwd("path/to/app")
+
+3. Run the app:
+   shiny::runApp()
